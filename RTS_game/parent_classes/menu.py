@@ -8,16 +8,13 @@ class menu:
         copy[pos] = "<" + copy[pos] + ">"
         print (copy)
 
-    def run_menu(self):
-        index = 0
-        while True:
-            user_input = input("> ")
+    def run_menu(self, index, user_input):
+        self.disp_menu(index % len(self.menu_items))
 
-            if (user_input == "a"):
-                index = index - 1
+        if (user_input == "a"):
+            index = index - 1
 
-            elif (user_input == "d"):
-                index = index + 1
+        elif (user_input == "d"):
+            index = index + 1
 
-
-            disp_menu(self, index % len(self.menu_items))
+        return index
