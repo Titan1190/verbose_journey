@@ -9,12 +9,13 @@ class menu:
         print (copy)
 
     def run_menu(self, index, user_input):
-        self.disp_menu(index % len(self.menu_items))
 
         if (user_input == "a"):
             index = index - 1
 
         elif (user_input == "d"):
             index = index + 1
+
+        self.disp_menu(index % len(self.menu_items))
 
         return index

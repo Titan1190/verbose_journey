@@ -22,6 +22,21 @@ class start_menu(menu):
 
     def run_menu(self):
         index = 0
+
+        print('''
+###################################################
+
+        ------------- INPUTS -------------------
+
+        "d" to move menu selection to right
+        "a" to move menu selection to left
+        ""  to select menu item
+
+###################################################
+        ''')
+
+        index = super().run_menu(0, "")
+
         while True:
             user_input = input("> ")
             index = super().run_menu(index, user_input)
