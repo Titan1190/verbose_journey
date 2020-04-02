@@ -2,7 +2,7 @@ from parent_classes.menu import menu
 
 class start_menu(menu):
     def __init__(self):
-        super().__init__(["START", "HELP", "SETTINGS", "QUIT"])
+        super().__init__([])
 
     def show_help():
         print('''
@@ -18,10 +18,12 @@ class start_menu(menu):
     def show_settings():
         print("UNDER CONSTRUCTION")
 
+
  # first input doesn't change index & when first run displays nothing
 
+
     def run_menu(self):
-        index = 0
+        self.menu_items = ["START", "HELP", "SETTINGS", "QUIT"]
 
         print('''
 ###################################################

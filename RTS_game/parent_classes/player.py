@@ -17,4 +17,3 @@ class Player:
     self.wood = 0
     for key, value in kwargs.items():
       setattr(self, key, value)
- 
