@@ -12,7 +12,6 @@ class game_start():
         ''')
         race = self.choose_race()
         user = pl.player(race)
-        print(user.race)
 
     def choose_race(self):
         print("SELECT YOUR RACE")
