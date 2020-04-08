@@ -1,4 +1,5 @@
 from menu import menu
+import player as pl
 
 class game_start():
 
@@ -9,6 +10,9 @@ class game_start():
                 ARE YOU READY TO ROCK??!!!!
         ##########################################
         ''')
+        race = self.choose_race()
+        user = pl.player(race)
+        print(user.race)
 
     def choose_race(self):
         print("SELECT YOUR RACE")
@@ -21,7 +25,7 @@ class game_start():
 
             # Description
             if user_input == "":
-                self.race = races.menu_items
+                return races.menu_items[index]
                 break
 
             if index == 0 :
@@ -31,7 +35,6 @@ class game_start():
                 Devoted to clarity & with a bit too much coin in their pocket
                 the Classists progress slowly but reach the epitome of music.
                 ''')
-
 
             elif index == 1 :
                 # Alternative Description
@@ -50,7 +53,7 @@ class game_start():
                 beats go flying but few last forever.
                 ''')
 
-            else:
+            elif index == 3:
                 # Jazz Description
                 print('''
                 Jazz. That golden swing that never grows old. Jazz is steady, its

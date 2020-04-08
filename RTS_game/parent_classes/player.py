@@ -10,8 +10,9 @@ Player():
 '''
 
 
-class Player:
-  __init__(self, **kwargs):
+class player:
+  def __init__(self, race, **kwargs):
+    self.race = race
     self.hp = 100
     self.gold = 0
     self.wood = 0

@@ -18,4 +18,4 @@ class menu:
 
         self.disp_menu(index % len(self.menu_items))
 
-        return index
+        return (index % len(self.menu_items))
