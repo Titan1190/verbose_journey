@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
 
+from copy import deepcopy
+
 # Randomize elements in array
 def randomize():
     x = 2*random()
@@ -26,7 +28,7 @@ def game_of_life(arr, increments):
 
     while(increments >= 0):
         count = 0
-        past_arr = [row[:] for row in arr]
+        past_arr = deepcopy(arr)
 
         for i in range(len(past_arr)):
             for j in range(len(past_arr[i])):
@@ -50,14 +52,19 @@ def game_of_life(arr, increments):
 
                 if (neighbors == 2 or neighbors == 3) and past_arr[i][j] == 1:
                     arr[i][j] == 1
-                elif neighbors == 3 and past_arr[i][j] == 0:
+                    print("First")
+                elif (neighbors == 3 and past_arr[i][j] == 0):
                     arr[i][j] == 1
+                    print("Second")
                 else:
                     arr[i][j] == 0
+                    print("Third")
 
-        fig, ax = plt.subplots()
-        ax.imshow(arr, cmap=cmap, norm=norm)
-        plt.show()
+                print(arr[i][j])
+
+        #fig, ax = plt.subplots()
+        #ax.imshow(arr, cmap=cmap, norm=norm)
+        #plt.show()
         time.sleep(1)
         increments -= 1
 
