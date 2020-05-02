@@ -1,11 +1,17 @@
 import time
 from random import random
 
-import matplotlib.pyplot as plt
-from matplotlib import colors
-import numpy as np
+import pygame
 
-from copy import deepcopy
+
+DEAD_COLOR = (90, 90, 90)
+WINDOW_HEIGHT = 400
+WINDOW_WIDTH = 400
+SLEEP_TIME = 0.2
+
+def light_rainbow():
+    arr =[140 + int(random()*115) for x in range(3)]
+    return arr
 
 # Randomize elements in array
 def randomize():
@@ -21,14 +27,22 @@ def create_array(x,y):
     return arr
 
 # Implements game of life
-def game_of_life(arr, increments):
-    cmap = colors.ListedColormap(['cyan', '#85F077'])
-    bounds = [0,1,2]
-    norm = colors.BoundaryNorm(bounds, cmap.N)
 
-    while(increments >= 0):
-        count = 0
-        past_arr = deepcopy(arr)
+def create_grid(arr):
+    color_arr = light_rainbow()
+    LIVE_COLOR = (color_arr[0], color_arr[1], color_arr[2])
+    blockSize = WINDOW_WIDTH / len(arr)
+    for i in range(len(arr)):
+        for j in range(len(arr[i])):
+            rect = pygame.Rect(i*blockSize, j*blockSize,
+            blockSize, blockSize)
+            if arr[i][j] == 0:
+                pygame.draw.rect(SCREEN, DEAD_COLOR, rect, 0)
+            else:
+                pygame.draw.rect(SCREEN, LIVE_COLOR, rect, 0)
+
+def game_of_life(arr):
+        past_arr = [x[:] for x in arr]
 
         for i in range(len(past_arr)):
             for j in range(len(past_arr[i])):
@@ -51,22 +65,31 @@ def game_of_life(arr, increments):
                             neighbors+=1
 
                 if (neighbors == 2 or neighbors == 3) and past_arr[i][j] == 1:
-                    arr[i][j] == 1
-                    print("First")
+                    arr[i][j] = 1
                 elif (neighbors == 3 and past_arr[i][j] == 0):
-                    arr[i][j] == 1
-                    print("Second")
+                    arr[i][j] = 1
                 else:
-                    arr[i][j] == 0
-                    print("Third")
+                    arr[i][j] = 0
+        return arr
 
-                print(arr[i][j])
+def main():
+    global SCREEN, CLOCK
+    pygame.init()
+    SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
+    CLOCK = pygame.time.Clock()
+    SCREEN.fill(DEAD_COLOR)
+    arr = create_array(40,40)
 
-        #fig, ax = plt.subplots()
-        #ax.imshow(arr, cmap=cmap, norm=norm)
-        #plt.show()
-        time.sleep(1)
-        increments -= 1
+    while True:
+        create_grid(arr)
+        arr = game_of_life(arr)
+        time.sleep(SLEEP_TIME)
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-game_of_life(create_array(10, 10), 3)
+        pygame.display.update()
+
+main()
