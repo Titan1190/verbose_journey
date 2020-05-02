@@ -7,7 +7,8 @@ import pygame
 DEAD_COLOR = (90, 90, 90)
 WINDOW_HEIGHT = 400
 WINDOW_WIDTH = 400
-SLEEP_TIME = 0.2
+SLEEP_TIME = .05
+arr_length = 40
 
 def light_rainbow():
     arr =[140 + int(random()*115) for x in range(3)]
@@ -27,10 +28,7 @@ def create_array(x,y):
     return arr
 
 # Implements game of life
-
-def create_grid(arr):
-    color_arr = light_rainbow()
-    LIVE_COLOR = (color_arr[0], color_arr[1], color_arr[2])
+def create_grid(arr, LIVE_COLOR):
     blockSize = WINDOW_WIDTH / len(arr)
     for i in range(len(arr)):
         for j in range(len(arr[i])):
@@ -78,18 +76,26 @@ def main():
     SCREEN = pygame.display.set_mode((WINDOW_HEIGHT, WINDOW_WIDTH))
     CLOCK = pygame.time.Clock()
     SCREEN.fill(DEAD_COLOR)
-    arr = create_array(40,40)
+    arr = create_array(arr_length,arr_length)
 
     while True:
-        create_grid(arr)
+        color_arr = light_rainbow()
+        LIVE_COLOR = (color_arr[0], color_arr[1], color_arr[2])
+
+        for x in range(50):
+            create_grid(arr, LIVE_COLOR)
+            for y in range(len(color_arr)):
+                    color_arr[y] -= 1
+            LIVE_COLOR = (color_arr[0], color_arr[1], color_arr[2])
+            time.sleep(SLEEP_TIME / 75)
+            pygame.display.update()
+
         arr = game_of_life(arr)
-        time.sleep(SLEEP_TIME)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        pygame.display.update()
 
 main()
