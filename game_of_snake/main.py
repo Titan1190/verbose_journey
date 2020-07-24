@@ -5,12 +5,20 @@ import sys
 
 WIN_WIDTH = 600
 WIN_HEIGHT = 600
-WIN = pg.display.set_mode((WIN_HEIGHT, WIN_HEIGHT), )
+WIN = pg.display.set_mode((WIN_HEIGHT, WIN_HEIGHT))
 SIZE = 20
 VEL = 25
 INITIAL_X = 50
 INITIAL_Y = 50
 
+
+def create_grid():
+    blockSize = 20
+    for i in range(0, 24):
+        for j in range(0, 24):
+            rect = pg.Rect(i*VEL, j*VEL,
+            blockSize, blockSize)
+            pg.draw.rect(WIN, (255,255,0), rect, 2)
 
 # Include initialization function for head
 
@@ -24,7 +32,7 @@ class Head:
         self.dir_list = Direction_List()
         self.color = (88, 214, 141)
         self.last = 0
-        self.cooldown = 200
+        self.cooldown = 150
 
     def move(self):
         if self.direction == "up":
@@ -42,8 +50,7 @@ class Head:
         self.dir_list.turn_length += 1
         #print("turn length: {}".format(self.dir_list.turn_length))
 
-
-    def change_direction(self, event):
+    def change_direction(self, event, turns, snake):
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_w:
                 self.direction = "up"
@@ -56,10 +63,13 @@ class Head:
 
             self.dir_list.length_list.append(self.dir_list.turn_length)
             self.dir_list.turn_length = 0
-
             self.dir_list.direction_list.append(self.direction)
+
             self.dir_list.x_pos.append(self.surface.x)
             self.dir_list.y_pos.append(self.surface.y)
+
+            for body in snake[1:]:
+                body.dir_list.append(self.direction)
 
     def draw(self, WIN):
         pg.draw.rect(WIN, self.color, self.surface, 0)
@@ -85,16 +95,19 @@ class Direction_List:
         self.length_list = []
         self.turn_length = 0
 
+    # Delayed reaction due to processing overlay
 
 class Tail:
 
-    def __init__(self, direction, x, y, dir_index):
+    def __init__(self, direction, x, y, score):
         self.VEL = 25
         self.SIZE = SIZE
         self.direction = direction
         self.surface = pg.Rect(x, y, self.SIZE, self.SIZE)
         self.color = (130, 224, 170)
-        self.dir_index = dir_index
+        self.score = score
+        self.current = 0
+        self.dir_list = []
 
     def draw(self, WIN):
         pg.draw.rect(WIN, self.color, self.surface, 0)
@@ -112,12 +125,18 @@ class Tail:
         if self.direction == "left":
             self.surface = self.surface.move(-self.VEL, 0)
 
-    def follow_path(self, snake):
-        head = snake[0]
-        if self.direction != head.direction:
-            if self.surface.x == head.dir_list.x_pos[self.dir_index] or self.surface.y == head.dir_list.y_pos[self.dir_index]:
-                self.dir_index += 1
-                self.direction = head.dir_list.direction_list[self.dir_index]
+        if len(self.dir_list) != 0:
+            self.current += 1
+
+
+# Need to refrence index of element not yet created however not everytime
+
+    def follow_path(self):
+        if len(self.dir_list) != 0:
+            if self.current == self.score:
+                self.direction = self.dir_list[0]
+                self.dir_list.pop(0)
+                self.current = 0
 
 class Apple:
 
@@ -143,26 +162,27 @@ class Apple:
     def draw(self, WIN):
         pg.draw.rect(WIN, self.color, self.surface, 0)
 
-
-def draw_window(win, snake, apple):
+def draw_window(win, snake, apple, turns):
     win.fill((0,0,0))
     for body in snake:
         body.draw(win)
     apple.draw(win)
+    create_grid()
     pg.display.update()
 
 def add_tail(snake, score):
     head = snake[0]
+    tail_score = score
     score = score + 1 # Add Head
     length_list = head.dir_list.length_list[:]
     length_list.append(head.dir_list.turn_length) # Add distance currently traveled
 
     list_index = len(length_list) - 1 #reverse index
+
     while(list_index >= 0):
         score -= length_list[list_index]
         if score <= 0:
             score = abs(score)
-            print("Score {}". format(score))
             if list_index == 0:
                 dir = 'right'
             else:
@@ -177,19 +197,21 @@ def add_tail(snake, score):
                 y_pos = head.dir_list.y_pos[list_index - 1] + VEL * score
 
             if dir == "left":
-                x_pos = head.dir_list.x_pos[list_index - 1] + VEL * score
+                x_pos = head.dir_list.x_pos[list_index - 1] - VEL * score
                 y_pos = head.dir_list.y_pos[list_index - 1]
 
             if dir == "right":
+
                 if list_index == 0:
-                    x_pos = INITIAL_X - VEL * score
+                    x_pos = INITIAL_X + VEL * score
                     y_pos = head.dir_list.y_pos[list_index - 1]
                 else:
-                    x_pos = head.dir_list.x_pos[list_index - 1] - VEL * score
+                    x_pos = head.dir_list.x_pos[list_index - 1] + VEL * score
                     y_pos = head.dir_list.y_pos[list_index - 1]
 
-            snake.append(Tail(dir, x_pos, y_pos, list_index - 1))
+            snake.append(Tail(dir, x_pos, y_pos, tail_score))
             break
+
         list_index -= 1
 
 def main():
@@ -199,6 +221,7 @@ def main():
     snake = [head]
     apples = []
     apples.append(Apple(snake))
+    turns = []
     score = 0
     now = 0
     last = 0
@@ -209,7 +232,11 @@ def main():
             body.move()
 
             if isinstance(body, Tail):
-                body.follow_path(snake)
+                body.follow_path()
+                print(' ,'.join(body.dir_list))
+                #print(body)
+                print("Score: {}, Current: {}".format(body.score, body.current))
+
 
             if isinstance(body, Head):
                 if body.collide_snake(WIN, snake):
@@ -224,19 +251,21 @@ def main():
                     add_tail(snake, score)
 
 
-        draw_window(WIN, snake, apples[0])
+        draw_window(WIN, snake, apples[0], turns)
         clock.tick(6)
 
         for event in pg.event.get():
             if now - last >= head.cooldown:
                 last = now
-                head.change_direction(event)
+                head.change_direction(event, turns, snake)
             if event.type == pg.QUIT:
-                print(head.dir_list.direction_list)
-                print(head.dir_list.x_pos)
-                print(head.dir_list.y_pos)
-                print(head.dir_list.length_list)
                 run = False
+                '''print("Direction List: {}".format(head.dir_list.direction_list))
+                print("X_Pos: {}".format(head.dir_list.x_pos))
+                print("Y_Pos: {}".format(head.dir_list.y_pos))
+                print("Current Length List: {}".format(head.dir_list.length_list))
+                print("Current Length: {}".format(head.dir_list.turn_length))
+                '''
                 pg.quit()
                 sys.exit()
 
